@@ -281,9 +281,7 @@ function HeroB() {
 
 // ---- Theme toggle ----
 function ThemeToggle() {
-  const [dark, setDark] = useState(
-    document.documentElement.getAttribute('data-theme') !== 'light'
-  );
+  const [dark, setDark] = useState(true);
   function toggle() {
     const next = dark ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', next);
