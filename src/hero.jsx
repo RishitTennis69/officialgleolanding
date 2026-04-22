@@ -237,12 +237,56 @@ function Hero({ variant = 'A' }) {
   );
 }
 
+// ---- Cycling engine name in hero headline ----
+const CYCLE_ENGINES = ['ChatGPT', 'Gemini', 'Perplexity', 'Claude'];
+
+function CyclingWord() {
+  const [idx, setIdx] = useState(0);
+  const [state, setState] = useState('visible'); // 'visible' | 'exit' | 'enter'
+
+  useEffect(() => {
+    const pause = setTimeout(() => {
+      setState('exit');
+      const swap = setTimeout(() => {
+        setIdx(i => (i + 1) % CYCLE_ENGINES.length);
+        setState('enter');
+        const settle = setTimeout(() => setState('visible'), 350);
+        return () => clearTimeout(settle);
+      }, 300);
+      return () => clearTimeout(swap);
+    }, 2400);
+    return () => clearTimeout(pause);
+  }, [idx]);
+
+  const transforms = {
+    visible: 'translateY(0)',
+    exit:    'translateY(-110%)',
+    enter:   'translateY(110%)',
+  };
+  const opacities = { visible: 1, exit: 0, enter: 0 };
+
+  return (
+    <span style={{ display: 'inline-block', overflow: 'hidden', verticalAlign: 'bottom' }}>
+      <span className="serif-i u-grad" style={{
+        display: 'inline-block',
+        transform: transforms[state],
+        opacity: opacities[state],
+        transition: state === 'visible'
+          ? 'transform .35s cubic-bezier(.2,.9,.3,1), opacity .25s ease'
+          : 'transform .28s cubic-bezier(.4,0,1,1), opacity .2s ease',
+      }}>
+        {CYCLE_ENGINES[idx]}.
+      </span>
+    </span>
+  );
+}
+
 // ---- Hero variant A: giant serif hook, left-aligned editorial ----
 function HeroA() {
   return (
     <div>
-      <h1 className="display" style={{ fontSize: 'clamp(64px, 10vw, 168px)', margin: '0 0 24px' }}>
-        Get cited by <span className="serif-i u-grad">ChatGPT.</span><br/>
+      <h1 className="display" style={{ fontSize: 'clamp(64px, 10vw, 168px)', margin: '0 0 24px', lineHeight: 1 }}>
+        Get cited by <CyclingWord /><br/>
         Not buried <span className="serif-i" style={{ color:'var(--ink-dim)' }}>by it.</span>
       </h1>
       <div style={{ display:'grid', gridTemplateColumns:'1.3fr 1fr', gap: 56, alignItems:'end', marginTop: 12 }} className="hero-lede">
