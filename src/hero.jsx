@@ -167,8 +167,7 @@ function Hero({ variant = 'A' }) {
                     <div key={i} style={{
                       display:'grid', gridTemplateColumns:'20px 1fr auto auto', gap: 14, alignItems:'center',
                       padding: '12px 18px', borderTop: i===0?0:'1px solid var(--line)',
-                      opacity: phase === 1 ? 0.3 : 1,
-                      transition: 'opacity .3s ease',
+                      animation: phase === 2 ? `findingIn .4s ease ${i * 55}ms both` : 'none',
                     }}>
                       <div style={{
                         width: 18, height: 18, borderRadius: 6,
@@ -229,6 +228,9 @@ function Hero({ variant = 'A' }) {
       <style>{`
         @keyframes scanbar { 0% { transform: translateX(-100%); width: 30%; } 50% { width: 60%; } 100% { transform: translateX(300%); width: 30%; } }
         @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes wordIn  { from { transform: translateY(80%);  opacity: 0; filter: blur(8px); } to { transform: translateY(0);   opacity: 1; filter: blur(0); } }
+        @keyframes wordOut { from { transform: translateY(0);    opacity: 1; filter: blur(0); } to { transform: translateY(-80%); opacity: 0; filter: blur(8px); } }
+        @keyframes findingIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
         @media (max-width: 900px) {
           .hero-demo-grid { grid-template-columns: 1fr !important; }
         }
@@ -242,38 +244,36 @@ const CYCLE_ENGINES = ['ChatGPT', 'Gemini', 'Perplexity', 'Claude'];
 
 function CyclingWord() {
   const [idx, setIdx] = useState(0);
-  const [state, setState] = useState('visible'); // 'visible' | 'exit' | 'enter'
+  const [outIdx, setOutIdx] = useState(null);
+  const [gen, setGen] = useState(0);
 
   useEffect(() => {
-    const pause = setTimeout(() => {
-      setState('exit');
-      const swap = setTimeout(() => {
-        setIdx(i => (i + 1) % CYCLE_ENGINES.length);
-        setState('enter');
-        const settle = setTimeout(() => setState('visible'), 350);
-        return () => clearTimeout(settle);
-      }, 300);
-      return () => clearTimeout(swap);
-    }, 2400);
-    return () => clearTimeout(pause);
-  }, [idx]);
-
-  const transforms = {
-    visible: 'translateY(0)',
-    exit:    'translateY(-110%)',
-    enter:   'translateY(110%)',
-  };
-  const opacities = { visible: 1, exit: 0, enter: 0 };
+    const t = setInterval(() => {
+      setIdx(prev => {
+        const next = (prev + 1) % CYCLE_ENGINES.length;
+        setOutIdx(prev);
+        setGen(g => g + 1);
+        setTimeout(() => setOutIdx(null), 650);
+        return next;
+      });
+    }, 3000);
+    return () => clearInterval(t);
+  }, []);
 
   return (
-    <span style={{ display: 'inline-block', overflow: 'hidden', verticalAlign: 'bottom' }}>
-      <span className="serif-i u-grad" style={{
-        display: 'inline-block',
-        transform: transforms[state],
-        opacity: opacities[state],
-        transition: state === 'visible'
-          ? 'transform .35s cubic-bezier(.2,.9,.3,1), opacity .25s ease'
-          : 'transform .28s cubic-bezier(.4,0,1,1), opacity .2s ease',
+    <span style={{ display: 'inline-block', position: 'relative', verticalAlign: 'bottom' }}>
+      {outIdx !== null && (
+        <span key={`out-${gen}`} className="serif-i u-grad" style={{
+          position: 'absolute', top: 0, left: 0, whiteSpace: 'nowrap',
+          animation: 'wordOut .55s cubic-bezier(.4,0,.6,1) forwards',
+          pointerEvents: 'none',
+        }}>
+          {CYCLE_ENGINES[outIdx]}.
+        </span>
+      )}
+      <span key={`in-${gen}`} className="serif-i u-grad" style={{
+        display: 'inline-block', whiteSpace: 'nowrap',
+        animation: gen > 0 ? 'wordIn .6s cubic-bezier(.15,.9,.3,1.05) both' : 'none',
       }}>
         {CYCLE_ENGINES[idx]}.
       </span>

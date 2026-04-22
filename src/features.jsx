@@ -68,8 +68,12 @@ function Features() {
               background:'var(--card)', border:'1px solid var(--line)', borderRadius: 24,
               padding: 32, display:'flex', flexDirection:'column', gap: 20, minHeight: 360,
               position:'relative', overflow:'hidden',
+              transition: 'transform .22s ease, box-shadow .22s ease, border-color .22s ease',
+              cursor: 'default',
             }}
-            className="feature-card">
+            className="feature-card"
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 24px 64px rgba(124,92,255,0.18)'; e.currentTarget.style.borderColor = 'var(--violet-2)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; e.currentTarget.style.borderColor = ''; }}>
               <div style={{ display:'flex', alignItems:'baseline', justifyContent:'space-between', zIndex: 2 }}>
                 <div className="mono" style={{ fontSize: 10, color:'var(--violet-2)', letterSpacing:'0.22em' }}>{f.tag}</div>
                 <div className="mono" style={{ fontSize: 10, color:'var(--ink-faint)' }}>0{i+1}</div>
